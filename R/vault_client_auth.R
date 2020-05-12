@@ -38,6 +38,7 @@ vault_client_auth <- R6::R6Class(
     ##' authentication.  See [`vaultr::vault_client_auth_userpass`] for
     ##' more information.
     userpass = NULL,
+    aws = NULL,
 
     ##' @description Create a `vault_client_auth` object. Not typically
     ##'   called by users.
@@ -59,6 +60,9 @@ vault_client_auth <- R6::R6Class(
       add_const_member(
         self, "approle",
         vault_client_auth_approle$new(private$api_client, "approle"))
+      add_const_member(
+        self, "aws",
+        vault_client_auth_aws$new(private$api_client, "aws"))
     },
 
     ##' @description Return a character vector of supported
