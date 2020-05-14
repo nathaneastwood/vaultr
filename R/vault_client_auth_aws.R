@@ -36,7 +36,7 @@ vault_client_auth_aws <- R6::R6Class(
           vault_client_auth_aws$new(private$api_client, mount)
         },
         
-        login = function(role, credentials = NULL) {
+        login = function(role, credentials = NULL, region = NULL) {
           assert_scalar_character(role, "role")
           
           if (is.null(credentials)) {
@@ -55,7 +55,8 @@ vault_client_auth_aws <- R6::R6Class(
               request_body = sts_request_body,
               verb = "POST",
               canonical_headers = sts_canonical_headers,
-              action = "/")
+              action = "/",
+              region = region)
           
           vault_request_body <- list(
               role = role,
