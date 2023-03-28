@@ -36,6 +36,59 @@ vault_client_auth_aws <- R6::R6Class(
           vault_client_auth_aws$new(private$api_client, mount)
         },
         
+        configure_client = function(max_retries = NULL, access_key = NULL,
+            secret_key = NULL, iam_endpoint = NULL, sts_endpoint = NULL,
+            sts_region = NULL, iam_server_id_header_value = NULL) {
+          
+          body <- list(
+              max_retries = max_retries %&&%
+                  assert_scalar_integer(max_retries),
+              access_key = access_key %&&%
+                  assert_scalar_character(access_key),
+              secret_key = secret_key %&&%
+                  assert_scalar_character(secret_key),
+              iam_endpoint = iam_endpoint %&&%
+                  assert_scalar_character(iam_endpoint),
+              sts_endpoint = sts_endpoint %&&%
+                  assert_scalar_character(sts_endpoint),
+              sts_region = sts_region %&&%
+                  assert_scalar_character(sts_region),
+              iam_server_id_header_value = iam_server_id_header_value %&&%
+                  assert_scalar_character(iam_server_id_header_value))
+          
+          path <- sprintf("/auth/%s/config/client", private$mount)
+          private$api_client$POST(path, body = drop_null(body))
+          invisible(TRUE)
+        },
+        
+        role_write = function(role,
+            bound_iam_principal_arn = NULL,
+            token_ttl = NULL,
+            token_max_ttl = NULL,
+            policies = NULL) {
+          
+          assert_scalar_character(role, "role")
+          
+          body <- list(
+              role = role,
+              auth_type = "iam",
+              bound_iam_principal_arn = bound_iam_principal_arn %&&%
+                  paste(assert_character(bound_iam_principal_arn),
+                      collapse = ","),
+              token_ttl = token_ttl %&&%
+                  assert_scalar_integer(token_ttl),
+              token_max_ttl = token_max_ttl %&&%
+                  assert_scalar_integer(token_max_ttl),
+              policies = policies %&&%
+                  paste(assert_character(policies), collapse = ",")
+          )
+          
+          path <- sprintf("/auth/%s/role/%s", private$mount, role)
+          private$api_client$POST(path, body = drop_null(body))
+          invisible(NULL)
+          
+        },
+        
         login = function(role, credentials = NULL, region = NULL) {
           assert_scalar_character(role, "role")
           
